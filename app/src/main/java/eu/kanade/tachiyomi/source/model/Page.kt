@@ -14,6 +14,8 @@ open class Page(
     val number: Int
         get() = index + 1
 
+    var twoPageSpread: Boolean = false
+
     @Transient
     @Volatile
     var status: Int = 0

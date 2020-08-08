@@ -79,6 +79,11 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             override fun onPageScrollStateChanged(state: Int) {
                 isIdle = state == ViewPager.SCROLL_STATE_IDLE
             }
+
+            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+                Timber.d("Page scrolled to $position")
+                super.onPageScrolled(position, positionOffset, positionOffsetPixels)
+            }
         })
         pager.tapListener = f@{ event ->
             if (!config.tappingEnabled) {
@@ -264,6 +269,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      * Moves to the next page.
      */
     open fun moveToNext() {
+        Timber.d("Moving to next")
         moveRight()
     }
 
@@ -271,6 +277,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      * Moves to the previous page.
      */
     open fun moveToPrevious() {
+        Timber.d("Moving to previous")
         moveLeft()
     }
 

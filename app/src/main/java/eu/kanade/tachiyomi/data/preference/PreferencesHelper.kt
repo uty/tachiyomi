@@ -244,4 +244,6 @@ class PreferencesHelper(val context: Context) {
     fun trustedSignatures() = flowPrefs.getStringSet("trusted_signatures", emptySet())
 
     fun enableDoh() = prefs.getBoolean(Keys.enableDoh, false)
+
+    fun twoPageMode() = flowPrefs.getBoolean(Keys.twoPageMode, false)
 }

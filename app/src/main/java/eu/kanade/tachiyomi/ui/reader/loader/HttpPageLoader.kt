@@ -89,6 +89,21 @@ class HttpPageLoader(
             .getPageListFromCache(chapter.chapter)
             .onErrorResumeNext { source.fetchPageList(chapter.chapter) }
             .map { pages ->
+//                pages.fold(mutableListOf<Page>()) { pageList, page ->
+//                    //TODO: remove this
+//                    var previousPage = pageList.lastOrNull()
+//                    if (previousPage == null) {
+//                        pageList.add(page)
+//                        return@fold pageList
+//                    }
+//                    // if previous and current are not landscape, concat them
+//                    val streamFn = page.stream ?: return@fold
+//                    val bmp = BitmapFactory.decodeStream(page.stream)
+//                    // else add current to the list
+//                    pageList.add(page)
+//
+//                    return@fold pageList
+//                }
                 pages.mapIndexed { index, page ->
                     // Don't trust sources and use our own indexing
                     ReaderPage(index, page.url, page.imageUrl)

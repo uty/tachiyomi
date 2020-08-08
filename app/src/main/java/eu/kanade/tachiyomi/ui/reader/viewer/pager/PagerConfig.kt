@@ -20,6 +20,9 @@ class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelpe
     var imageCropBorders = false
         private set
 
+    var twoPageMode = true
+        private set
+
     init {
         preferences.imageScaleType()
             .register({ imageScaleType = it }, { imagePropertyChangedListener?.invoke() })
@@ -29,6 +32,9 @@ class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelpe
 
         preferences.cropBorders()
             .register({ imageCropBorders = it }, { imagePropertyChangedListener?.invoke() })
+
+        preferences.twoPageMode()
+            .register({ twoPageMode = it })
     }
 
     private fun zoomTypeFromPreference(value: Int) {

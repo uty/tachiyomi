@@ -1,6 +1,10 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
 import android.annotation.SuppressLint
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Paint
 import android.graphics.PointF
 import android.graphics.drawable.Drawable
 import android.view.GestureDetector
@@ -35,12 +39,15 @@ import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
+import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
+import kotlin.math.max
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import rx.subjects.Subject
 
 /**
  * View of the ViewPager that contains a page of a chapter.
@@ -98,6 +105,8 @@ class PagerPageHolder(
      */
     private var readImageHeaderSubscription: Subscription? = null
 
+    private var statusSubject: Subject<Int, Int>? = null
+
     init {
         addView(progressBar)
         observeStatus()
@@ -121,12 +130,20 @@ class PagerPageHolder(
      * @see processStatus
      */
     private fun observeStatus() {
+        // TODO: maybe this is needed
+//        statusSubject = SerializedSubject(PublishSubject.create<Int>())
         statusSubscription?.unsubscribe()
 
         val loader = page.chapter.pageLoader ?: return
         statusSubscription = loader.getPage(page)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { processStatus(it) }
+//        if (nextPage != null) {
+//            loader = nextPage.chapter.pageLoader ?: return
+//            statusSubscription = loader.getPage(nextPage)
+//                .observeOn(AndroidSchedulers.mainThread())
+//                .subscribe { processStatus(it) }
+//        }
     }
 
     /**
@@ -157,6 +174,10 @@ class PagerPageHolder(
                 setDownloading()
             }
             Page.READY -> {
+//                if (page.status == Page.READY && (nextPage == null || nextPage?.status == Page.READY)) {
+//                    setImage()
+//                }
+//                // TODO: wait for next page if needed
                 setImage()
                 unsubscribeProgress()
             }
@@ -226,15 +247,40 @@ class PagerPageHolder(
         progressBar.completeAndFadeOut()
         retryButton?.isVisible = false
         decodeErrorLayout?.isVisible = false
+        val config = viewer.config
 
         unsubscribeReadImageHeader()
         val streamFn = page.stream ?: return
 
         var openStream: InputStream? = null
+        var nextStream: InputStream? = null
         readImageHeaderSubscription = Observable
             .fromCallable {
-                val stream = streamFn().buffered(16)
+                var stream = streamFn().buffered(16)
                 openStream = stream
+
+                if (config.twoPageMode && page.nextPage != null) {
+                    val nextStreamFn = page.nextPage?.stream
+                    if (nextStreamFn != null) {
+                        nextStream = nextStreamFn().buffered(16)
+                        val bmp1 = BitmapFactory.decodeStream(openStream)
+                        val bmp2 = BitmapFactory.decodeStream(nextStream)
+
+                        // stitch them together
+                        val result = Bitmap.createBitmap(bmp1.width + bmp2.width, max(bmp1.height, bmp2.height), bmp1.config)
+                        val canvas = Canvas(result)
+                        val paint = Paint()
+                        canvas.drawBitmap(bmp1, if (viewer is L2RPagerViewer) 0f else bmp2.width.toFloat(), 0f, paint)
+                        canvas.drawBitmap(bmp2, if (viewer is L2RPagerViewer) bmp1.width.toFloat() else 0f, 0f, paint)
+
+//                            val imageType = ImageUtil.findImageType(stream)
+
+                        val resultStream = ByteArrayOutputStream()
+                        result.compress(Bitmap.CompressFormat.JPEG, 100, resultStream)
+                        stream = resultStream.toByteArray().inputStream().buffered(16)
+                        openStream = stream
+                    }
+                }
 
                 ImageUtil.findImageType(stream) == ImageUtil.ImageType.GIF
             }
@@ -249,7 +295,10 @@ class PagerPageHolder(
             }
             // Keep the Rx stream alive to close the input stream only when unsubscribed
             .flatMap { Observable.never<Unit>() }
-            .doOnUnsubscribe { openStream?.close() }
+            .doOnUnsubscribe {
+                openStream?.close()
+                nextStream?.close()
+            }
             .subscribe({}, {})
     }
 

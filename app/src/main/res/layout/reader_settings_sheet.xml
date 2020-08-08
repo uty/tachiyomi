@@ -337,12 +337,22 @@
 
     <!-- Groups of preferences -->
 
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/two_page_mode"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/pref_two_page_mode"
+        android:textColor="?android:attr/textColorSecondary"
+        app:layout_constraintTop_toBottomOf="@+id/page_transitions"
+        tools:layout_editor_absoluteX="24dp" />
+
     <androidx.constraintlayout.widget.Group
         android:id="@+id/pager_prefs_group"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:visibility="gone"
-        app:constraint_referenced_ids="pager_prefs,scale_type_text,scale_type,zoom_start_text,zoom_start,crop_borders"
+        app:constraint_referenced_ids="pager_prefs,scale_type_text,scale_type,zoom_start_text,zoom_start,crop_borders,page_transitions,two_page_mode"
+        tools:layout_editor_absoluteX="24dp"
         tools:visibility="visible" />
 
     <androidx.constraintlayout.widget.Group

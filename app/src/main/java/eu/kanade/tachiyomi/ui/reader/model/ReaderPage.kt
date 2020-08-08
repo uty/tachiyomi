@@ -7,8 +7,8 @@ class ReaderPage(
     index: Int,
     url: String = "",
     imageUrl: String? = null,
+    var nextPage: ReaderPage? = null,
     var stream: (() -> InputStream)? = null
 ) : Page(index, url, imageUrl, null) {
-
     lateinit var chapter: ReaderChapter
 }

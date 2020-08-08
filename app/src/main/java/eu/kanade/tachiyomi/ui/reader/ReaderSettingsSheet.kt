@@ -16,6 +16,25 @@ import eu.kanade.tachiyomi.databinding.ReaderSettingsSheetBinding
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
+import kotlinx.android.synthetic.main.reader_settings_sheet.always_show_chapter_transition
+import kotlinx.android.synthetic.main.reader_settings_sheet.background_color
+import kotlinx.android.synthetic.main.reader_settings_sheet.crop_borders
+import kotlinx.android.synthetic.main.reader_settings_sheet.crop_borders_webtoon
+import kotlinx.android.synthetic.main.reader_settings_sheet.cutout_short
+import kotlinx.android.synthetic.main.reader_settings_sheet.fullscreen
+import kotlinx.android.synthetic.main.reader_settings_sheet.keepscreen
+import kotlinx.android.synthetic.main.reader_settings_sheet.long_tap
+import kotlinx.android.synthetic.main.reader_settings_sheet.page_transitions
+import kotlinx.android.synthetic.main.reader_settings_sheet.pager_prefs_group
+import kotlinx.android.synthetic.main.reader_settings_sheet.rotation_mode
+import kotlinx.android.synthetic.main.reader_settings_sheet.scale_type
+import kotlinx.android.synthetic.main.reader_settings_sheet.show_page_number
+import kotlinx.android.synthetic.main.reader_settings_sheet.true_color
+import kotlinx.android.synthetic.main.reader_settings_sheet.two_page_mode
+import kotlinx.android.synthetic.main.reader_settings_sheet.viewer
+import kotlinx.android.synthetic.main.reader_settings_sheet.webtoon_prefs_group
+import kotlinx.android.synthetic.main.reader_settings_sheet.webtoon_side_padding
+import kotlinx.android.synthetic.main.reader_settings_sheet.zoom_start
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -90,6 +109,8 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) : BottomSheetDia
         binding.scaleType.bindToPreference(preferences.imageScaleType(), 1)
         binding.zoomStart.bindToPreference(preferences.zoomStart(), 1)
         binding.cropBorders.bindToPreference(preferences.cropBorders())
+        page_transitions.bindToPreference(preferences.pageTransitions())
+        two_page_mode.bindToPreference(preferences.twoPageMode())
     }
 
     /**

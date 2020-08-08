@@ -160,6 +160,11 @@ class SettingsReaderController : SettingsController() {
                 titleRes = R.string.pref_crop_borders
                 defaultValue = false
             }
+            switchPreference {
+                key = Keys.twoPageMode
+                titleRes = R.string.pref_two_page_mode
+                defaultValue = false
+            }
         }
 
         preferenceCategory {

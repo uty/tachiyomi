@@ -247,6 +247,7 @@
     <string name="pref_custom_brightness">Custom brightness</string>
     <string name="pref_custom_color_filter">Custom color filter</string>
     <string name="pref_color_filter_mode">Color filter blend mode</string>
+    <string name="pref_two_page_mode">Two page spread mode (downloaded only)</string>
     <string name="filter_mode_default">Default</string>
     <string name="filter_mode_overlay">Overlay</string>
     <string name="filter_mode_multiply">Multiply</string>

@@ -4,6 +4,7 @@ import android.content.Context
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -21,7 +22,8 @@ class ChapterLoader(
     private val context: Context,
     private val downloadManager: DownloadManager,
     private val manga: Manga,
-    private val source: Source
+    private val source: Source,
+    private val preferences: PreferencesHelper
 ) {
 
     /**
@@ -77,7 +79,7 @@ class ChapterLoader(
     private fun getPageLoader(chapter: ReaderChapter): PageLoader {
         val isDownloaded = downloadManager.isChapterDownloaded(chapter.chapter, manga, true)
         return when {
-            isDownloaded -> DownloadPageLoader(chapter, manga, source, downloadManager)
+            isDownloaded -> DownloadPageLoader(chapter, manga, source, downloadManager, preferences.twoPageMode().get())
             source is HttpSource -> HttpPageLoader(chapter, source)
             source is LocalSource -> source.getFormat(chapter.chapter).let { format ->
                 when (format) {

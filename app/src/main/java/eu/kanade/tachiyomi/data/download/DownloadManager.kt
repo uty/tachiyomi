@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
+import com.google.gson.Gson
 import com.hippo.unifile.UniFile
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.R
@@ -11,6 +12,7 @@ import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
+import java.io.File
 import rx.Observable
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
@@ -141,6 +143,14 @@ class DownloadManager(private val context: Context) {
         return buildPageList(provider.findChapterDir(chapter, manga, source))
     }
 
+    data class ChapterMetadata(
+        val pages: List<PageMetadata>? = null
+    )
+
+    data class PageMetadata(
+        val name: String,
+        val twoPageSpread: Boolean = false
+    )
     /**
      * Builds the page list of a downloaded chapter.
      *
@@ -152,13 +162,27 @@ class DownloadManager(private val context: Context) {
             val files = chapterDir?.listFiles().orEmpty()
                 .filter { "image" in it.type.orEmpty() }
 
+            val metadataFile = chapterDir?.findFile("metadata")
+            val x = mutableMapOf<String, Boolean>()
+            if (metadataFile != null) {
+                val metadata = File(metadataFile.filePath!!)
+                val gson = Gson()
+                val chapterMetadata = gson.fromJson(metadata.readText(), ChapterMetadata::class.java)
+                chapterMetadata.pages?.forEach { p ->
+                    x[p.name] = p.twoPageSpread
+                }
+            }
+
             if (files.isEmpty()) {
                 throw Exception(context.getString(R.string.page_list_empty_error))
             }
 
             files.sortedBy { it.name }
                 .mapIndexed { i, file ->
-                    Page(i, uri = file.uri).apply { status = Page.READY }
+                    Page(i, uri = file.uri).apply {
+                        status = Page.READY
+                        twoPageSpread = x.getOrDefault(file.name, false)
+                    }
                 }
         }
     }

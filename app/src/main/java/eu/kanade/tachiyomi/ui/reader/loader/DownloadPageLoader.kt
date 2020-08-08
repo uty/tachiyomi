@@ -18,7 +18,8 @@ class DownloadPageLoader(
     private val chapter: ReaderChapter,
     private val manga: Manga,
     private val source: Source,
-    private val downloadManager: DownloadManager
+    private val downloadManager: DownloadManager,
+    private val twoPageMode: Boolean
 ) : PageLoader() {
 
     /**
@@ -32,13 +33,24 @@ class DownloadPageLoader(
     override fun getPages(): Observable<List<ReaderPage>> {
         return downloadManager.buildPageList(source, manga, chapter.chapter)
             .map { pages ->
-                pages.map { page ->
-                    ReaderPage(page.index, page.url, page.imageUrl) {
+                pages.fold(mutableListOf<ReaderPage>()) { pageList, page ->
+                    val rp = ReaderPage(page.index, page.url, page.imageUrl) {
                         context.contentResolver.openInputStream(page.uri ?: Uri.EMPTY)!!
                     }.apply {
                         status = Page.READY
+                        twoPageSpread = page.twoPageSpread
                     }
-                }
+
+                    val previousRP = pageList.lastOrNull()
+                    if (!twoPageMode || rp.twoPageSpread || previousRP == null || previousRP.twoPageSpread || previousRP.nextPage != null ||
+                        pageList.size < 2
+                    ) {
+                        pageList.add(rp)
+                    } else {
+                        previousRP.nextPage = rp
+                    }
+                    pageList
+                }.toList()
             }
     }
 

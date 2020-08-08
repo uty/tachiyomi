@@ -1,7 +1,9 @@
 package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.webkit.MimeTypeMap
+import com.google.gson.Gson
 import com.hippo.unifile.UniFile
 import com.jakewharton.rxrelay.BehaviorRelay
 import com.jakewharton.rxrelay.PublishRelay
@@ -438,6 +440,15 @@ class Downloader(
         return MimeTypeMap.getSingleton().getExtensionFromMimeType(mime) ?: "jpg"
     }
 
+    data class ChapterMetadata(
+        val pages: List<PageMetadata>? = null
+    )
+
+    data class PageMetadata(
+        val name: String,
+        val twoPageSpread: Boolean? = false
+    )
+
     /**
      * Checks if the download was successful.
      *
@@ -463,7 +474,20 @@ class Downloader(
 
         // Only rename the directory if it's downloaded.
         if (download.status == Download.DOWNLOADED) {
+            val metadataFile = File(tmpDir.createFile("metadata").filePath!!)
+            val metadata = ChapterMetadata(
+                downloadedImages.map { f ->
+                    val stream = context.contentResolver.openInputStream(f.uri)!!.buffered(16)
+                    val bmp = BitmapFactory.decodeStream(stream)
+                    stream.close()
+                    PageMetadata(f.name!!, bmp.width > bmp.height)
+                }.toList()
+            )
+            var gson = Gson()
+            metadataFile.writeText(gson.toJson(metadata))
+
             tmpDir.renameTo(dirname)
+
             cache.addChapter(dirname, mangaDir, download.manga)
 
             DiskUtil.createNoMediaFile(tmpDir, context)

@@ -161,6 +161,8 @@ object PreferenceKeys {
 
     const val enableDoh = "enable_doh"
 
+    const val twoPageMode = "two_page_mode_key"
+
     fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"
 
     fun trackPassword(syncId: Int) = "pref_mangasync_password_$syncId"
