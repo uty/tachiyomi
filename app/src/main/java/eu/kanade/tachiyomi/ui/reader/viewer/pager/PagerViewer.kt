@@ -71,20 +71,22 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         pager.offscreenPageLimit = 1
         pager.id = R.id.reader_pager
         pager.adapter = adapter
-        pager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
-            override fun onPageSelected(position: Int) {
-                onPageChange(position)
-            }
+        pager.addOnPageChangeListener(
+            object : ViewPager.SimpleOnPageChangeListener() {
+                override fun onPageSelected(position: Int) {
+                    onPageChange(position)
+                }
 
-            override fun onPageScrollStateChanged(state: Int) {
-                isIdle = state == ViewPager.SCROLL_STATE_IDLE
-            }
+                override fun onPageScrollStateChanged(state: Int) {
+                    isIdle = state == ViewPager.SCROLL_STATE_IDLE
+                }
 
-            override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
-                Timber.d("Page scrolled to $position")
-                super.onPageScrolled(position, positionOffset, positionOffsetPixels)
+                override fun onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int) {
+                    Timber.d("Page scrolled to $position")
+                    super.onPageScrolled(position, positionOffset, positionOffsetPixels)
+                }
             }
-        })
+        )
         pager.tapListener = f@{ event ->
             if (!config.tappingEnabled) {
                 activity.toggleMenu()
